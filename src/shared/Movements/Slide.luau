@@ -54,11 +54,11 @@ function module.Init()
 		local dir1 = Vector3.new(lastDir.X, 0, lastDir.Z)
 
 		local dir2 = CFrame.lookAt(
-			CurrentCamera.Position,
+			CurrentCamera.CFrame.Position,
 			Vector3.new(
-				CurrentCamera.Position.X + CurrentCamera.CFrame.LookVector.X,
-				CurrentCamera.Position.Y,
-				CurrentCamera.Position.Z + CurrentCamera.CFrame.LookVector.Z
+				CurrentCamera.CFrame.Position.X + CurrentCamera.CFrame.LookVector.X,
+				CurrentCamera.CFrame.Position.Y,
+				CurrentCamera.CFrame.Position.Z + CurrentCamera.CFrame.LookVector.Z
 			)
 		).LookVector -- Neutral camera rotation
 
