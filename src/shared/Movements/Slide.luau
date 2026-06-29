@@ -89,7 +89,7 @@ function module.Init()
 			local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
 			local posOnPlane = projectPointOnPlane(rayOrigin, rayCast.Position, rayCast.Normal)
 
-			nextPos = posOnPlane + rayCast.Normal * rayLength
+			nextPos = posOnPlane + rayCast.Normal * rayLenght
 			nextDir = projectVectorOnPlane(dir3, rayCast.Normal)
 
 			if nextDir.Magnitude > 1e-4 then
@@ -110,11 +110,9 @@ function module.Init()
 			hrs.CFrame = CFrame.new(rayCast2.Position, rayCast2.Position + reflection)
 				* CFrame.new(0, 0, -(distance - rayCast2.Distance))
 			lastDir = reflection.Unit
-			return
 		else
 			hrs.CFrame = CFrame.new(nextPos, nextPos + (nextDir * distance)) * CFrame.new(0, 0, -distance)
 			lastDir = nextDir.Unit
-			return
 		end
 	end))
 end
