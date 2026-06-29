@@ -8,7 +8,7 @@ local CurrentCamera = workspace.CurrentCamera
 local module = {
 	SlideSpeed = 20,
 	TurningSpeed = 5,
-	Gravity = 10,
+	Gravity = 0.75,
 }
 
 local newTrove = trove.new()
@@ -68,7 +68,7 @@ function module.Init()
 		if rayCast then
 			nextDir = projectVectorOnPlane(dir3, rayCast.Normal)
 		else
-			nextDir = lastDir:Lerp(Vector3.new(lastDir.X, -1, lastDir.Z))
+			nextDir = lastDir:Lerp(Vector3.new(lastDir.X, -1, lastDir.Z), module.Gravity * deltaTime)
 		end
 
 		local distance = module.SlideSpeed * deltaTime
