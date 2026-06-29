@@ -8,7 +8,7 @@ local CurrentCamera = workspace.CurrentCamera
 local started = tick()
 
 local module = {
-	SlideSpeed = 5,
+	SlideSpeed = 25,
 	TurningSpeed = 25,
 	Gravity = 0.75,
 }
@@ -43,7 +43,11 @@ function module.Init()
 
 	hrs.Anchored = true
 
-	local lastDir = hrs.CFrame.LookVector
+	local lastDir = Vector3.new(
+		hrs.CFrame.LookVector.X,
+		0,
+		hrs.CFrame.LookVector.Z
+	)
 	local rayLenght = 2.5
 	local lastTimeOnGround = tick() - started
 
@@ -54,7 +58,7 @@ function module.Init()
 	newTrove:Add(RunService.RenderStepped:Connect(function(deltaTime: number)
 		local diff = tick() - started
 		local rayOrigin = hrs.Position
-		local rayDir = -hrs.CFrame.UpVector * (rayLenght * 0.05)
+		local rayDir = -hrs.CFrame.UpVector * (rayLenght * 1.05)
 		local nextPos
 		local rayCast = workspace:Raycast(rayOrigin, rayDir, param)
 
