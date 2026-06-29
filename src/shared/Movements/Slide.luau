@@ -88,4 +88,8 @@ function module.Init()
 	end))
 end
 
+module.End = function()
+	
+end
+
 return module
