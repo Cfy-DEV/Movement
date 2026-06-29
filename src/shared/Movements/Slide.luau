@@ -43,11 +43,7 @@ function module.Init()
 
 	hrs.Anchored = true
 
-	local lastDir = Vector3.new(
-		hrs.CFrame.LookVector.X,
-		0,
-		hrs.CFrame.LookVector.Z
-	)
+	local lastDir = Vector3.new(hrs.CFrame.LookVector.X, 0, hrs.CFrame.LookVector.Z)
 	local rayLenght = 2.5
 	local lastTimeOnGround = tick() - started
 
@@ -79,7 +75,7 @@ function module.Init()
 
 			local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
 
-			nextPos = rayOrigin - (rayCast.Normal * rayLenght)
+			nextPos = rayOrigin + (rayCast.Normal * rayLenght)
 			nextDir = projectVectorOnPlane(dir3, rayCast.Normal)
 		else
 			nextPos = rayOrigin
