@@ -5,20 +5,18 @@ local trove = require(ReplicatedStorage.Packages.trove)
 local localPlayer = Players.LocalPlayer
 local CurrentCamera = workspace.CurrentCamera
 
-local started = tick()
-
 local module = {
-	SlideSpeed = 25,
-	TurningSpeed = 15,
-	Gravity = 0.75,
+	SlideSpeed = 5, -- the minimal speed
+	TurningSpeed = 50,
+	Gravity = workspace.Gravity,
+	Friction = 15, -- how much speed to lose per second
 }
 
 local newTrove = trove.new()
 
---[[
-Vector3.ProjectOnPlane(targetPoint, planeNormal) + 
-						 (Vector3.Dot(planeOrigin, planeNormal) * planeNormal);
-						 ]]
+function applyFriction(velocity, frictionCoeff, dt)
+	return velocity * math.exp(-frictionCoeff * dt)
+end
 
 local function projectVectorOnPlane(vector: Vector3, planeNormal: Vector3): Vector3
 	local normal = planeNormal.Unit
@@ -49,6 +47,10 @@ function module.Init()
 	if not char then
 		return
 	end
+	local hum: BasePart = char:FindFirstChildOfClass("Humanoid")
+	if not hum then
+		return
+	end
 	local hrs: BasePart = char:FindFirstChild("HumanoidRootPart")
 	if not hrs then
 		return
@@ -58,14 +60,13 @@ function module.Init()
 
 	local lastDir = Vector3.new(hrs.CFrame.LookVector.X, 0, hrs.CFrame.LookVector.Z)
 	local rayLenght = 2.5 + (hrs.Size.Y / 2)
-	local lastTimeOnGround = tick() - started
+	local speed = math.clamp(hrs.AssemblyLinearVelocity.Magnitude, module.SlideSpeed, math.huge)
 
 	local param = RaycastParams.new()
 	param.FilterType = Enum.RaycastFilterType.Exclude
 	param.FilterDescendantsInstances = { char }
 
 	newTrove:Add(RunService.RenderStepped:Connect(function(deltaTime: number)
-		local diff = tick() - started
 		local rayOrigin = hrs.Position
 		local rayDir = -hrs.CFrame.UpVector * (rayLenght * 1.05)
 		local nextPos
@@ -74,7 +75,6 @@ function module.Init()
 		local nextDir
 
 		if rayCast then
-			lastTimeOnGround = diff
 			local dir1 = Vector3.new(lastDir.X, 0, lastDir.Z)
 
 			local dir2 = CFrame.lookAt(
@@ -97,12 +97,19 @@ function module.Init()
 			else
 				nextDir = lastDir
 			end
+
+			local gravity = Vector3.new(0, -module.Gravity, 0)
+			local accel = gravity:Dot(nextDir)
+
+			speed = math.max(module.SlideSpeed, applyFriction(speed, module.Friction, deltaTime))
+
+			speed += accel * deltaTime
 		else
 			nextPos = rayOrigin
 			nextDir = lastDir:Lerp(Vector3.new(lastDir.X, -1, lastDir.Z), module.Gravity * deltaTime)
 		end
 
-		local distance = module.SlideSpeed * deltaTime
+		local distance = speed * deltaTime
 		local rayCast2 = workspace:Raycast(nextPos, nextDir * distance, param) -- Checking for any "bumps"
 
 		if rayCast2 then
