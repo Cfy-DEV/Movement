@@ -5,9 +5,11 @@ local trove = require(ReplicatedStorage.Packages.trove)
 local localPlayer = Players.LocalPlayer
 local CurrentCamera = workspace.CurrentCamera
 
+local started = tick()
+
 local module = {
-	SlideSpeed = 20,
-	TurningSpeed = 5,
+	SlideSpeed = 5,
+	TurningSpeed = 25,
 	Gravity = 0.75,
 }
 
@@ -39,40 +41,49 @@ function module.Init()
 		return
 	end
 
+	hrs.Anchored = true
+
 	local lastDir = hrs.CFrame.LookVector
 	local rayLenght = 2.5
+	local lastTimeOnGround = tick() - started
 
 	local param = RaycastParams.new()
 	param.FilterType = Enum.RaycastFilterType.Exclude
 	param.FilterDescendantsInstances = { char }
 
 	newTrove:Add(RunService.RenderStepped:Connect(function(deltaTime: number)
+		local diff = tick() - started
 		local rayOrigin = hrs.Position
-		local rayDir = -hrs.CFrame.UpVector * rayLenght
+		local rayDir = -hrs.CFrame.UpVector * (rayLenght * 0.05)
+		local nextPos
 		local rayCast = workspace:Raycast(rayOrigin, rayDir, param)
 
-		local dir1 = Vector3.new(lastDir.X, 0, lastDir.Z)
-
-		local dir2 = CFrame.lookAt(
-			CurrentCamera.CFrame.Position,
-			Vector3.new(
-				CurrentCamera.CFrame.Position.X + CurrentCamera.CFrame.LookVector.X,
-				CurrentCamera.CFrame.Position.Y,
-				CurrentCamera.CFrame.Position.Z + CurrentCamera.CFrame.LookVector.Z
-			)
-		).LookVector -- Neutral camera rotation
-
-		local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
 		local nextDir
 
 		if rayCast then
+			lastTimeOnGround = diff
+			local dir1 = Vector3.new(lastDir.X, 0, lastDir.Z)
+
+			local dir2 = CFrame.lookAt(
+				CurrentCamera.CFrame.Position,
+				Vector3.new(
+					CurrentCamera.CFrame.Position.X + CurrentCamera.CFrame.LookVector.X,
+					CurrentCamera.CFrame.Position.Y,
+					CurrentCamera.CFrame.Position.Z + CurrentCamera.CFrame.LookVector.Z
+				)
+			).LookVector -- Neutral camera rotation
+
+			local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
+
+			nextPos = rayOrigin - (rayCast.Normal * rayLenght)
 			nextDir = projectVectorOnPlane(dir3, rayCast.Normal)
 		else
+			nextPos = rayOrigin
 			nextDir = lastDir:Lerp(Vector3.new(lastDir.X, -1, lastDir.Z), module.Gravity * deltaTime)
 		end
 
 		local distance = module.SlideSpeed * deltaTime
-		local rayCast2 = workspace:Raycast(hrs.Position, nextDir * distance, param) -- Checking for any "bumps"
+		local rayCast2 = workspace:Raycast(nextPos, nextDir * distance, param) -- Checking for any "bumps"
 
 		if rayCast2 then
 			local reflection = getReflection(nextDir, rayCast2.Normal.Unit)
@@ -81,15 +92,13 @@ function module.Init()
 			lastDir = reflection.Unit
 			return
 		else
-			hrs.CFrame = CFrame.new(hrs.Position, hrs.Position + (nextDir * distance)) * CFrame.new(0, 0, -distance)
+			hrs.CFrame = CFrame.new(nextPos, nextPos + (nextDir * distance)) * CFrame.new(0, 0, -distance)
 			lastDir = nextDir.Unit
 			return
 		end
 	end))
 end
 
-module.End = function()
-	
-end
+module.End = function() end
 
 return module
