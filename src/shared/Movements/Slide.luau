@@ -9,7 +9,7 @@ local started = tick()
 
 local module = {
 	SlideSpeed = 25,
-	TurningSpeed = 25,
+	TurningSpeed = 15,
 	Gravity = 0.75,
 }
 
@@ -57,7 +57,7 @@ function module.Init()
 	hrs.Anchored = true
 
 	local lastDir = Vector3.new(hrs.CFrame.LookVector.X, 0, hrs.CFrame.LookVector.Z)
-	local rayLenght = 2.5
+	local rayLenght = 2.5 + (hrs.Size.Y / 2)
 	local lastTimeOnGround = tick() - started
 
 	local param = RaycastParams.new()
@@ -86,7 +86,7 @@ function module.Init()
 				)
 			).LookVector -- Neutral camera rotation
 
-			local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
+			local dir3 = (dir1:Lerp(dir2, (module.TurningSpeed / 100) * deltaTime)).Unit -- slight and FINAL rotation.
 			local posOnPlane = projectPointOnPlane(rayOrigin, rayCast.Position, rayCast.Normal)
 
 			nextPos = posOnPlane + rayCast.Normal * rayLenght
