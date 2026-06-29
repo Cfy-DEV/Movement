@@ -28,11 +28,11 @@ local function projectVectorOnPlane(vector: Vector3, planeNormal: Vector3): Vect
 end
 
 local function projectPointOnPlane(p: Vector3, plane_origin: Vector3, plane_normal: Vector3)
-    local to_point = p - plane_origin
-    local scalar = to_point:Dot(plane_normal)
-    local projected = p - (scalar * plane_normal)
-    
-    return projected
+	local to_point = p - plane_origin
+	local scalar = to_point:Dot(plane_normal)
+	local projected = p - (scalar * plane_normal)
+
+	return projected
 end
 
 local function getReflection(incidentVector: Vector3, surfaceNormal: Vector3): Vector3
@@ -88,11 +88,10 @@ function module.Init()
 
 			local dir3 = (dir1:Lerp(dir2, module.TurningSpeed * deltaTime)).Unit -- slight and FINAL rotation.
 			local posOnPlane = projectPointOnPlane(rayOrigin, rayCast.Position, rayCast.Normal)
-			local downPoint = rayCast.Position + Vector3.new(posOnPlane.X, 0, posOnPlane.Z)
 
-			nextPos = downPoint + (rayCast.Normal * rayLenght)
+			nextPos = posOnPlane + rayCast.Normal * rayLength
 			nextDir = projectVectorOnPlane(dir3, rayCast.Normal)
-			
+
 			if nextDir.Magnitude > 1e-4 then
 				nextDir = nextDir.Unit
 			else
